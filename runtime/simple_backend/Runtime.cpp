@@ -31,6 +31,29 @@
 #include "LibcWrappers.h"
 #include "Shadow.h"
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+typedef struct _CONTROL_DEPENDENCE_FLIP_MAP_RECORD_{
+	uint64_t                              ulControlDepedenceNodeAddress;
+	uint64_t                              ulControlDepedenceNodeDistance;
+  uint64_t                              ulControlDepedenceNodeJccAddress;
+  //int64_t                               lControlDepedenceNodeBalance;
+  //enum CONTROL_DEPENDENCE_NODE_TYPE     ulControlDepedenceNodeType;
+}CONTROL_DEPENDENCE_FLIP_MAP_RECORD,*P_CONTROL_DEPENDENCE_FLIP_MAP_RECORD,**PP_CONTROL_DEPENDENCE_FLIP_MAP_RECORD;
+
+#define FLIP_SHM_ENV_VAR                "__FLIP_AFL_SHM_ID"
+
+#define HASH_TABLE_SIZE                 65536
+#define HASH_TABLE_MAX_COLLISION_COUNT	4
+#define ADDRESS_MASK                    0xFFFFF
+
+uint64_t  *afl_flip_area_ptr            = NULL;
+
+// FirefoxXP Add End
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 #ifndef NDEBUG
 // Helper to print pointers properly.
 #define P(ptr) reinterpret_cast<void *>(ptr)
@@ -112,6 +135,32 @@ void _sym_initialize(void) {
 #ifndef NDEBUG
   std::cerr << "Initializing symbolic runtime" << std::endl;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+  char      *flip_id_str;
+
+  //uint64_t  *afl_flip_area_ptr          = NULL;          /* Exported for afl_gen_trace */
+
+
+  // will load share memory
+  if (getenv(FLIP_SHM_ENV_VAR)) {  // 
+
+    flip_id_str = getenv(FLIP_SHM_ENV_VAR);
+
+    if (flip_id_str) {
+
+      uint32_t shm_flip_id = atoi(flip_id_str);
+
+      afl_flip_area_ptr = shmat(shm_flip_id, NULL, 0);
+
+      if (afl_flip_area_ptr == (void *)-1) exit(1);
+
+    }
+  }
+
+// FirefoxXP Add End
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
   loadConfig();
   initLibcWrappers();
@@ -415,6 +464,20 @@ Z3_ast _sym_build_bool_to_bits(Z3_ast expr, uint8_t bits) {
 
 void _sym_push_path_constraint(Z3_ast constraint, int taken,
                                uintptr_t site_id [[maybe_unused]]) {
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+  uint64_t                                ulIndex;
+  P_CONTROL_DEPENDENCE_FLIP_MAP_RECORD    pstPointer;
+  int                                     i;
+  uint64_t                                ulEIP;
+
+// FirefoxXP Add End
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
   if (constraint == nullptr)
     return;
 
@@ -436,6 +499,28 @@ void _sym_push_path_constraint(Z3_ast constraint, int taken,
     Z3_dec_ref(g_context, constraint);
     return;
   }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+    if(NULL != afl_flip_area_ptr){
+    //FILE*         fp;
+    //char          buffer[128];
+    ulIndex     = (ulEIP & 0xFFFFF) % ( HASH_TABLE_SIZE/4 );
+    pstPointer  = (P_CONTROL_DEPENDENCE_FLIP_MAP_RECORD)afl_flip_area_ptr + ulIndex;
+    
+    //fprintf(stderr,"Address is:0x%lx\n",ulIndex);
+    
+    i = 0;
+    while( ( i < HASH_TABLE_MAX_COLLISION_COUNT ) && ( (pstPointer+i)->ulControlDepedenceNodeAddress > 0 ) ){
+        if( (pstPointer+i)->ulControlDepedenceNodeAddress == ulEIP ){
+            fprintf(g_log, "get it\n");
+        }
+        i++;
+    }
+
+// FirefoxXP Add End
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
   /* Generate a solution for the alternative */
   Z3_ast not_constraint =
