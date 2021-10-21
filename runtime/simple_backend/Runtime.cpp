@@ -31,29 +31,6 @@
 #include "LibcWrappers.h"
 #include "Shadow.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// FirefoxXP Add Start
-
-typedef struct _CONTROL_DEPENDENCE_FLIP_MAP_RECORD_{
-	uint64_t                              ulControlDepedenceNodeAddress;
-	uint64_t                              ulControlDepedenceNodeDistance;
-  uint64_t                              ulControlDepedenceNodeJccAddress;
-  //int64_t                               lControlDepedenceNodeBalance;
-  //enum CONTROL_DEPENDENCE_NODE_TYPE     ulControlDepedenceNodeType;
-}CONTROL_DEPENDENCE_FLIP_MAP_RECORD,*P_CONTROL_DEPENDENCE_FLIP_MAP_RECORD,**PP_CONTROL_DEPENDENCE_FLIP_MAP_RECORD;
-
-#define FLIP_SHM_ENV_VAR                "__FLIP_AFL_SHM_ID"
-
-#define HASH_TABLE_SIZE                 65536
-#define HASH_TABLE_MAX_COLLISION_COUNT	4
-#define ADDRESS_MASK                    0xFFFFF
-
-uint64_t  *afl_flip_area_ptr            = NULL;
-
-// FirefoxXP Add End
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 #ifndef NDEBUG
 // Helper to print pointers properly.
 #define P(ptr) reinterpret_cast<void *>(ptr)
@@ -135,32 +112,6 @@ void _sym_initialize(void) {
 #ifndef NDEBUG
   std::cerr << "Initializing symbolic runtime" << std::endl;
 #endif
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-// FirefoxXP Add Start
-  char      *flip_id_str;
-
-  //uint64_t  *afl_flip_area_ptr          = NULL;          /* Exported for afl_gen_trace */
-
-
-  // will load share memory
-  if (getenv(FLIP_SHM_ENV_VAR)) {  // 
-
-    flip_id_str = getenv(FLIP_SHM_ENV_VAR);
-
-    if (flip_id_str) {
-
-      uint32_t shm_flip_id = atoi(flip_id_str);
-
-      afl_flip_area_ptr = shmat(shm_flip_id, NULL, 0);
-
-      if (afl_flip_area_ptr == (void *)-1) exit(1);
-
-    }
-  }
-
-// FirefoxXP Add End
-/////////////////////////////////////////////////////////////////////////////////////////////////////
 
   loadConfig();
   initLibcWrappers();

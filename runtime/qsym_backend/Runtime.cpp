@@ -63,6 +63,22 @@
 #include <LibcWrappers.h>
 #include <Shadow.h>
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+/*
+typedef struct _EDGE_BLACK_LIST_FLIP_RECORD_{
+	uint64_t	ulControlDepedenceNodeJccAddress;
+	int64_t    	lTakenOrNotTaken;
+}EDGE_BLACK_LIST_FLIP_RECORD,*P_EDGE_BLACK_LIST_FLIP_RECORD,**PP_EDGE_BLACK_LIST_FLIP_RECORD;
+*/
+
+#define HASH_TABLE_SIZE                 65536
+#define HASH_TABLE_MAX_COLLISION_COUNT	4
+#define ADDRESS_MASK                    0xFFFFF
+
+// FirefoxXP Add End
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace qsym {
 
 ExprBuilder *g_expr_builder;
@@ -172,8 +188,24 @@ void _sym_initialize(void) {
   }
 
   g_z3_context = new z3::context{};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+  g_solver =
+      new Solver(inputFileName, g_config.outputDir, g_config.aflCoverageMap, g_config.ulEdgeBlackListFlipAddress);
+
+/*
+original:
   g_solver =
       new Solver(inputFileName, g_config.outputDir, g_config.aflCoverageMap);
+*/
+
+// FirefoxXP Add End
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
   g_expr_builder = g_config.pruning ? PruneExprBuilder::create()
                                     : SymbolicExprBuilder::create();
 }
