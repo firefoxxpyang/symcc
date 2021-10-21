@@ -13,6 +13,13 @@
 // SymCC. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Config.h"
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+#include <iostream>
+
+// FirefoxXP Add End
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
 #include <cstddef>
@@ -44,6 +51,19 @@ void loadConfig() {
   auto *fullyConcrete = getenv("SYMCC_NO_SYMBOLIC_INPUT");
   if (fullyConcrete != nullptr)
     g_config.fullyConcrete = checkFlagString(fullyConcrete);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+  char *pszFlipMapAddress = getenv("SYMCC_FLIP_MAP_ADDRESS");
+  std::cerr << "[loadConfig] SYMCC_FLIP_MAP_ADDRESS:" << pszFlipMapAddress << std::endl;
+  if (pszFlipMapAddress != NULL){
+    g_config.pstEdgeBlackListFlipArray = (P_EDGE_BLACK_LIST_FLIP_RECORD)atoi(pszFlipMapAddress);
+    std::cerr << "[loadConfig] pstEdgeBlackListFlipArray:" << std::dec << (uint64_t)(g_config.pstEdgeBlackListFlipArray) << std::endl;
+  }
+
+// FirefoxXP Add End
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
   auto *outputDir = getenv("SYMCC_OUTPUT_DIR");
   if (outputDir != nullptr)

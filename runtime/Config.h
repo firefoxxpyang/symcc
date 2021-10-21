@@ -17,6 +17,17 @@
 
 #include <string>
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+  
+typedef struct _EDGE_BLACK_LIST_FLIP_RECORD_{
+	uint64_t	ulControlDepedenceNodeJccAddress;
+	int64_t    	lTakenOrNotTaken;
+}EDGE_BLACK_LIST_FLIP_RECORD,*P_EDGE_BLACK_LIST_FLIP_RECORD,**PP_EDGE_BLACK_LIST_FLIP_RECORD;
+
+// FirefoxXP Add End
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct Config {
   /// Should we allow symbolic data in the program?
   bool fullyConcrete = false;
@@ -50,6 +61,15 @@ struct Config {
   /// 2GB on most workloads because requiring that amount of memory per core
   /// participating in the analysis seems reasonable.
   size_t garbageCollectionThreshold = 5'000'000;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// FirefoxXP Add Start
+
+  P_EDGE_BLACK_LIST_FLIP_RECORD pstEdgeBlackListFlipArray;
+
+// FirefoxXP Add End
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+  
 };
 
 /// The global configuration object.
