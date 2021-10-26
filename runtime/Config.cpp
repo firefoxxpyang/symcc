@@ -58,7 +58,7 @@ void loadConfig() {
   char *pszFlipMapAddress = getenv("SYMCC_FLIP_MAP_ADDRESS");
   std::cerr << "[loadConfig] SYMCC_FLIP_MAP_ADDRESS:" << pszFlipMapAddress << std::endl;
   if (pszFlipMapAddress != NULL){
-    g_config.ulEdgeBlackListFlipAddress = atoi(pszFlipMapAddress);
+    g_config.ulEdgeBlackListFlipAddress = strtol(pszFlipMapAddress,NULL, 16);
     std::cerr << "[loadConfig] pstEdgeBlackListFlipArray:" << std::dec << g_config.ulEdgeBlackListFlipAddress << std::endl;
   }
 
